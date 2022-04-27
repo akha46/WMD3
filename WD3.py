@@ -1,12 +1,6 @@
 import pandas as pd
 import numpy as np
 import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.tree import DecisionTreeClassifier
 import streamlit as st
 
 all_data = pd.read_csv("vineyard_weather_1948-2017.csv",low_memory=False)
@@ -33,27 +27,7 @@ week_split_y = week_split['storm'].values
 all_x = pd.DataFrame(week_split_x, columns = ['PRCP','TMAX','TMIN'])
 all_y = pd.DataFrame(week_split_y, columns = ['storm'])
 
-X_train, X_test, y_train, y_test = train_test_split(all_x, all_y, test_size=0.3, random_state=42)
 
-clf = DecisionTreeClassifier()
-dtc_model = clf.fit(X_train, y_train)
-y_pred = dtc_model.predict(X_test)
-print("Accuracy")
-print(accuracy_score(y_test, y_pred))
-print('Prescision')
-print(precision_score(y_test, y_pred))
-print('Recall')
-print(recall_score(y_test, y_pred))
-print('\n')
-cmd = confusion_matrix(y_test, y_pred)
-print(confusion_matrix(y_test, y_pred))
-print(classification_report(y_test, y_pred))
-
-tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-specificity_d = tn / (tn+fp)
-print(' specificity: %0.5f' % specificity_d )
-sensitivity_d = tp / (tp + fn)
-print(' sensitivity: %0.5f' % sensitivity_d )
 
 def calc_payout(p_s, specificity_d, cost_h, cost_nh_s, cost_nh_ns):
     p_dns_ns = specificity_d*(1- p_s)
@@ -88,8 +62,7 @@ p_s = 0.5
 
 cost_nh_s = max((P_NH_NM * Cost_NH_NM + P_NH_M * Cost_NH_M), cost_h)
 cost_nh_ns = max((P_NH_NS *Cost_NH_NS + P_NH_TS*Cost_NH_TS + P_NH_HS *Cost_NH_HS),cost_h)
-estimate = calc_payout(0.5,specificity_d,cost_h,cost_nh_s,cost_nh_ns)
-clair = cost_h - estimate
+
 
 
 def generate_evalue(prob_storm, sensitivity, specificity, p_harvest, p_wait_ns_no_sugar, p_wait_ns_typical_sugar,
